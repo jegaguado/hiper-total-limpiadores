@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Rock+Salt&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Estanterías dinámicas</title>
+  <style>
+    * {
+      font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      color: white;
+      font-size: 60px;
+      margin: 30px 10px;
+      border-radius: 10px;
+      background-color: #525252;
+      padding:0 20px;
+      font-family: 'Patrick Hand SC', cursive,'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      font-weight: 200;
+      font-style: normal;
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+      box-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    body{
+      display:flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+    }
+
+    .background {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('fondo-supermercado.jfif');
+      background-size: cover;
+      background-position: center;
+      filter: blur(8px) brightness(0.80);
+      z-index: -1;
+    }
+
+    .box-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+            box-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(44, 2.1vw);
+      grid-template-rows: repeat(6, 3.5vw);
+      max-width: 100vw;
+      gap: 0px;
+      overflow-x: hidden;
+      margin: 0 auto;
+      background-color: #ccc;
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      border-bottom: 3px solid #ccc;
+      border-top: 3px solid #fff;
+    }
+
+    .separator {
+      border-right: 3px solid #525252;
+    }
+
+    .barra-iconos {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-top: 2px solid #ccc;
+      z-index: 10;
+      display:flex;
+      flex-direction: row-reverse;
+      justify-content: space-evenly;
+    }
+
+    .icono-selector {
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 5px;
+    }
+
+    .icono-selector.seleccionado {
+      border-color: #007bff;
+      box-shadow: 0 0 5px #007bff;
+    }
+
+    .cell img {
+      max-width: 90%;
+      max-height: 90%; 
+    }
+
+    #contadorTotal {
+      visibility: hidden;
+      font-size: 22px;
+      font-weight: bold;
+      color: white;
+      background-color: #333;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .barra-progreso-container {
+      width: 90%;
+      height: 30px;
+      background: #ddd;
+      border-radius: 20px;
+      margin: 15px auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .barra-progreso {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, #00c853, #64dd17);
+      transition: width 0.5s ease;
+      box-shadow: 1px 3px 5px rgba(0,0,0,0.5);
+    }
+
+    .porcentaje-label {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: bold;
+      color: #333;
+      z-index: 2;
+    }
+
+    .barra-inferior{
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 90px;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 2px solid #ccc;
+      z-index: 10;
+      padding: 5px;
+      display:flex;
+      flex-direction: row;
+      justify-content: space-around;
+    }
+  </style>
+</head>
+<body>
+  <h2>Total limpiadores</h2>
+  <div id="contadorTotal">Total: 0</div>
+  <div class="barra-progreso-container">
+    <div class="porcentaje-label" id="porcentajeLabel">0.00%</div>
+    <div id="barraProgreso" class="barra-progreso"></div>
+  </div>
+  <div class="background"></div>
+  <div class="box-grid"><div class="grid" id="contenedor"></div></div>
+  <div class="barra-inferior">
+    <div class="barra-iconos" id="barraIconos">
+      <button onclick="location.href='hipermercado-mundo-baño.html'" style="padding:10px 15px;font-size:16px;cursor:pointer;border-radius:5px;border:1px solid #007bff;background-color:#007bff;color:white;">Mundo Baño</button>
+      <button id="mostrarMaximo" style="padding:10px 15px;font-size:16px;cursor:pointer;border-radius:5px;border:1px solid #007bff;background-color:#007bff;color:white;">Mostrar Máximo</button>
+      <img src="img/papelera.png" id="papeleraIcono" class="icono-selector" title="Borrar elementos">
+    </div>
+  </div>
+
+  <script>
+    const contenedor = document.getElementById("contenedor");
+    const contador = document.getElementById("contadorTotal");
+    const barraProgreso = document.getElementById("barraProgreso");
+    const porcentajeLabel = document.getElementById("porcentajeLabel");
+
+    const papelera = document.getElementById("papeleraIcono");
+    papelera.addEventListener("click", () => {
+      console.log("hoa");
+      document.querySelectorAll(".icono-selector").forEach(i => i.classList.remove("seleccionado"));
+      papelera.classList.add("seleccionado");
+      iconoSeleccionado = papelera;
+    });
+
+    let total = 0;
+    const TOTAL_MAXIMO = 1968960;
+
+    const iconosConfig = {
+      "TWC_03": { valor: 9506, max: 96, acumulado: 0 },
+      "TWC_cocina": { valor: 6101, max: 24, acumulado: 0 },
+      "TWC_bref": { valor: 9941, max: 12, acumulado: 0 },
+      "TWC_limpiadores universales": { valor: 6090, max: 96, acumulado: 0 },
+      "TWC_lejias": { valor: 5723, max: 36, acumulado: 0 }
+    };
+
+    for (let i = 0; i < 264; i++) {
+      const celda = document.createElement("div");
+      celda.className = "cell";
+      const col = i % 44;
+      if ((col + 1) % 4 === 0 && col !== 43) celda.classList.add("separator");
+      celda.dataset.ocupado = "false";
+      contenedor.appendChild(celda);
+    }
+
+    const objetos = Object.keys(iconosConfig);
+    const barra = document.getElementById("barraIconos");
+    let iconoSeleccionado = null;
+
+    objetos.forEach(nombre => {
+      const ruta = `/img/241-25 - Henkel Ibérica - Iconos Dummies para ${nombre}.png`;
+      const img = document.createElement("img");
+      img.src = ruta;
+      img.alt = nombre;
+      img.title = nombre;
+      img.classList.add("icono-selector");
+      img.dataset.nombre = nombre;
+      barra.appendChild(img);
+
+      img.addEventListener("click", () => {
+              console.log("hoa");
+        document.querySelectorAll(".icono-selector").forEach(i => i.classList.remove("seleccionado"));
+        img.classList.add("seleccionado");
+        iconoSeleccionado = img;
+      });
+    });
+
+    function actualizarContadorYBarra() {
+      contador.textContent = `Total: ${total.toFixed(3)}`;
+      const porcentaje = Math.min((total / TOTAL_MAXIMO) * 100, 100);
+      barraProgreso.style.width = `${porcentaje.toFixed(2)}%`;
+      porcentajeLabel.textContent = `${porcentaje.toFixed(2)}%`;
+    }
+
+    function intentarColocar(celda) {
+      if (!celda || !celda.classList.contains("cell")) return;
+
+      if (iconoSeleccionado) {
+        const esPapelera = iconoSeleccionado.id === "papeleraIcono";
+
+        if (esPapelera && celda.dataset.ocupado === "true") {
+          const nombre = celda.querySelector("img")?.getAttribute("alt");
+          if (iconosConfig[nombre]) {
+            if (iconosConfig[nombre].acumulado > 0) {
+              iconosConfig[nombre].acumulado -= 1;
+              if (iconosConfig[nombre].acumulado < iconosConfig[nombre].max) {
+                total -= iconosConfig[nombre].valor;
+                total = Math.max(0, total);
+                actualizarContadorYBarra();
+              }
+            }
+          }
+          celda.innerHTML = "";
+          celda.dataset.ocupado = "false";
+        }
+
+        if (!esPapelera && celda.dataset.ocupado === "false") {
+          const nombre = iconoSeleccionado.dataset.nombre;
+          const config = iconosConfig[nombre];
+
+          const img = document.createElement("img");
+          img.src = iconoSeleccionado.src;
+          img.alt = nombre;
+          celda.appendChild(img);
+          celda.dataset.ocupado = "true";
+
+          if (config) {
+            config.acumulado += 1;
+            if (config.acumulado <= config.max) {
+              total += config.valor;
+              actualizarContadorYBarra();
+            }
+          }
+        }
+      }
+    }
+
+    let colocando = false;
+
+  contenedor.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // ← evita el scroll vertical
+    const touch = e.touches[0];
+    if (iconoSeleccionado && iconoSeleccionado.id === "papeleraIcono") {
+      const celdasCercanas = getNearbyCells(touch.clientX, touch.clientY);
+      celdasCercanas.forEach(c => intentarColocar(c));
+    } else {
+      const celda = document.elementFromPoint(touch.clientX, touch.clientY);
+      intentarColocar(celda);
+    }
+    colocando = true;
+  }, { passive: false });
+
+
+    contenedor.addEventListener("touchmove", (e) => {
+      if (colocando) {
+        e.preventDefault();
+        const touch = e.touches[0];
+if (iconoSeleccionado && iconoSeleccionado.id === "papeleraIcono") {
+  const celdasCercanas = getNearbyCells(touch.clientX, touch.clientY);
+  celdasCercanas.forEach(c => intentarColocar(c));
+} else {
+  const celda = document.elementFromPoint(touch.clientX, touch.clientY);
+  intentarColocar(celda);
+}
+
+      }
+    }, { passive: false });
+
+    contenedor.addEventListener("touchend", () => {
+      colocando = false;
+    });
+
+    contenedor.addEventListener("mousedown", (e) => {
+      intentandoColocarConMouse(e);
+      colocando = true;
+    });
+
+    contenedor.addEventListener("mousemove", (e) => {
+      if (colocando) intentandoColocarConMouse(e);
+    });
+
+    contenedor.addEventListener("mouseup", () => {
+      colocando = false;
+    });
+
+    function intentandoColocarConMouse(e) {
+      const celda = document.elementFromPoint(e.clientX, e.clientY);
+      intentarColocar(celda);
+    }
+
+    //borrado robusto
+    function getNearbyCells(x, y, radio = 20) {
+  const cells = [];
+  document.querySelectorAll(".cell").forEach(celda => {
+    const rect = celda.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const distancia = Math.hypot(cx - x, cy - y);
+    if (distancia <= radio) cells.push(celda);
+  });
+  return cells;
+}
+
+
+    //valores maximos ideales
+
+    document.getElementById("mostrarMaximo").addEventListener("click", () => {
+    const valoresIdeal = [
+      9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,6101,6101,6101,6101,9941,9941,9941,9941,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,5723,5723,5723,5723,
+      9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,6101,6101,6101,6101,9941,9941,9941,9941,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,5723,5723,5723,5723,
+      9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,6101,6101,6101,6101,9941,9941,9941,9941,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,5723,5723,5723,5723,
+      9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,6101,6101,6101,6101,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,5723,5723,5723,5723,5723,5723,5723,5723,
+      9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,6101,6101,6101,6101,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,5723,5723,5723,5723,5723,5723,5723,5723,
+      9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,9506,6101,6101,6101,6101,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,6090,5723,5723,5723,5723,5723,5723,5723,5723
+    ];
+
+    const valorToNombre = {};
+    Object.entries(iconosConfig).forEach(([nombre, cfg]) => {
+      valorToNombre[cfg.valor] = nombre;
+    });
+
+    const celdas = document.querySelectorAll(".cell");
+    Object.keys(iconosConfig).forEach(k => iconosConfig[k].acumulado = 0);
+    total = 0;
+
+    celdas.forEach((celda, idx) => {
+      celda.innerHTML = "";
+      celda.dataset.ocupado = "false";
+      const valor = valoresIdeal[idx];
+      const nombre = valorToNombre[valor];
+      const icono = iconosConfig[nombre];
+      if (nombre && icono) {
+        const img = document.createElement("img");
+        img.src = `img/241-25 - Henkel Ibérica - Iconos Dummies para ${nombre}.png`;
+        img.alt = nombre;
+        celda.appendChild(img);
+        celda.dataset.ocupado = "true";
+        icono.acumulado++;
+        total += icono.valor;
+      }
+    });
+
+    actualizarContadorYBarra();
+  });
+  </script>
+</body>
+</html>
